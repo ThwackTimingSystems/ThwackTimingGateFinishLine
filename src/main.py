@@ -1,20 +1,22 @@
-import serial
+ import serial
 import threading
 import time
 import random
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 import crc8
+import json
 from bitstring import BitArray, BitStream
+from datetime import datetime
 
 
-racerTimes = {}
+racerTimes = []
 
 delay = 0
 
 RTT_RESPONSE_PACKET = bytes([2 236]) # 00000010 11101100 
 
 ser = serial.Serial("/dev/ttyUSB0", baudrate=9600)
-hasher = crc8.crc8()
+
 
 GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
@@ -22,9 +24,9 @@ GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 10 to be an input
 
 while True:
     if ser.inWaiting()>0:
-        packet = parsePacket()
-        if packet["type"] == 0:
-            startRacer()
+        packet = parsePacket() #
+        if packet["type"] == 0: 
+            startRacer(packet.data)
         if packet["type"] == 1:
             ser.write(RTT_RESPONSE_PACKET)
         if packet["type"] == 3:
@@ -34,8 +36,8 @@ while True:
         finishRacer()
             
 
-def startRacer
-    racerTimes.append(time.time())
+def startRacer(racerId)
+    racerTimes.append((racerId, time.time()))
     print("")
     print("-----------------------------------")
     print('Racer On Course')
@@ -43,8 +45,18 @@ def startRacer
     print("")
 
 def finishRacer()
-    finishTime = int((time.time() - racerTimes[0]) * 1000) / 1000.0)
+    finishTime = int((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
+    racerId = racerTimes[0][0]
     racerTimes.pop(0)
+
+    result = {
+        "racerID": racerID, 
+        "racerName": "Name Not Assigned", 
+        "runDuration": finishTime, 
+        "startTime": str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute)
+    }
+    addResult(result)
+
     print("")
     print("-----------------------------------")
     print("FINISH TIME")
@@ -56,33 +68,38 @@ def parsePacket(packet):
     header = BitArray(ser.read(1))
     length = header.read(uint:4)
     packetType = header.read(uint:4)
-    
+
     data = BitArray(ser.read(length))
     CRC8 = BitArray(ser.read(1))
 
     #recompute CRC and mark packet as error if both CRCs don't match
     if length == 0: 
-        hasher.update(header.bin)
+        packetTop = header.int
     else
-        hasher.update(int(str(header.bin) + str(data.bin))
-    if CRC8.hex != hasher.hexdigest():
+        packetTop = int(str(header.int) + str(data.int))
+    if calcualteCheckSum(packetTop) != hasher.hexdigest():
         return {"type": "error"}
+    
+    return {
+        "type": packetType,
+        "data": data.bin
+    }
 
-    if packetType==0 or packetType==1:
-        return {"type": packetType}
-    else if packetType==3:
-        return {
-            "type": packetType,
-            "data": data.bin
-        }
+def addResult(result)
+    fname = "test.json"
 
+    with open(fname) as feedsjson:
+        currentResults = json.load(feedsjson)
 
-#type numbers
-#1 - start
-#2 - round trip calculation start
-#3 - round trip calculation ack
-#4 - round trip calculation report
+    currentResults.append(result)
 
+    with open(fname, mode='w') as f:
+        f.write(json.dumps(currentResults))
 
+def calculateCheckSum(input):
+    tot = 0
+    for i in range(8):
+        tot += (input>>i) & 1
+    return tot
 
 GPIO.cleanup() # Clean up

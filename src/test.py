@@ -1,10 +1,19 @@
 from bitstring import BitArray, BitStream
+import Leaderboard
+import json
+import os
+from datetime import datetime
 
-# myBytes = bytes(range(256))
-# for i in range(257):print(myBytes[i])
+print(str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute))
 
-# print(myBytes)
+def calculateCheckSum(input):
+    tot = 0
+    for i in range(8):
+        tot += (input>>i) & 1
+    return tot
 
-a = bytes(range(5))
-A = BitArray(bin='01101')
-print(A)
+print(calculateCheckSum(0))
+print(calculateCheckSum(4))
+print(calculateCheckSum(8))
+print(calculateCheckSum(9))
+
