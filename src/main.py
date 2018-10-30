@@ -85,16 +85,7 @@ def parsePacket(packet):
         "data": data.bin
     }
 
-def addResult(result)
-    fname = "test.json"
 
-    with open(fname) as feedsjson:
-        currentResults = json.load(feedsjson)
-
-    currentResults.append(result)
-
-    with open(fname, mode='w') as f:
-        f.write(json.dumps(currentResults))
 
 def calculateCheckSum(input):
     tot = 0
