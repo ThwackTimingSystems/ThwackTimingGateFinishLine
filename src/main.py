@@ -73,7 +73,6 @@ def parsePacket(packet):
     print(length)
     print(packetType)
 
-
     data = BitArray(ser.read(length))
     CRC8 = BitArray(ser.read(1))
 
