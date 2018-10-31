@@ -1,4 +1,4 @@
- import serial
+import serial
 import threading
 import time
 import random
@@ -13,7 +13,7 @@ racerTimes = []
 
 delay = 0
 
-RTT_RESPONSE_PACKET = bytes([2 236]) # 00000010 11101100 
+RTT_RESPONSE_PACKET = bytes([2, 236]) # 00000010 11101100 
 
 ser = serial.Serial("/dev/ttyUSB0", baudrate=9600)
 
@@ -36,7 +36,7 @@ while True:
         finishRacer()
             
 
-def startRacer(racerId)
+def startRacer(racerId):
     racerTimes.append((racerId, time.time()))
     print("")
     print("-----------------------------------")
@@ -44,7 +44,7 @@ def startRacer(racerId)
     print("-----------------------------------")
     print("")
 
-def finishRacer()
+def finishRacer():
     finishTime = int((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
     racerId = racerTimes[0][0]
     racerTimes.pop(0)
@@ -69,6 +69,11 @@ def parsePacket(packet):
     length = header.read(uint:4)
     packetType = header.read(uint:4)
 
+    print(header)
+    print(length)
+    print(packetType)
+
+
     data = BitArray(ser.read(length))
     CRC8 = BitArray(ser.read(1))
 
@@ -85,7 +90,16 @@ def parsePacket(packet):
         "data": data.bin
     }
 
+def addResult(result):
+    fname = "test.json"
 
+    with open(fname) as feedsjson:
+        currentResults = json.load(json.load)
+
+    currentResults.append(result)
+
+    with open(fname, mode='w') as f:
+        f.write(json.dumps(currentResults))
 
 def calculateCheckSum(input):
     tot = 0
