@@ -1,13 +1,11 @@
-import serial
-import threading
+import os
 import time
+from datetime import datetime
 import random
 import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
-import crc8
+import serial
 import json
 from bitstring import BitArray, BitStream
-from datetime import datetime
-
 
 racerTimes = []
 
@@ -17,27 +15,12 @@ RTT_RESPONSE_PACKET = bytes([2, 236]) # 00000010 11101100
 
 ser = serial.Serial("/dev/ttyUSB0", baudrate=9600)
 
-
 GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
-GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 10 to be an input
-
-while True:
-    if ser.inWaiting()>0:
-        packet = parsePacket() #
-        if packet["type"] == 0: 
-            startRacer(packet.data)
-        if packet["type"] == 1:
-            ser.write(RTT_RESPONSE_PACKET)
-        if packet["type"] == 3:
-            delay = packet["data"]
-
-    if GPIO.input(12) == GPIO.LOW:
-        finishRacer()
-            
+GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 10 to be an input        
 
 def startRacer(racerId):
-    racerTimes.append((racerId, time.time()))
+    racerTimes.append([racerId, time.time()])
     print("")
     print("-----------------------------------")
     print('Racer On Course')
@@ -45,14 +28,15 @@ def startRacer(racerId):
     print("")
 
 def finishRacer():
-    finishTime = int((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
+    finishTime = int(((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
     racerId = racerTimes[0][0]
     racerTimes.pop(0)
 
     result = {
-        "racerID": racerID, 
+        "racerID": racerId, 
         "racerName": "Name Not Assigned", 
-        "runDuration": finishTime, 
+        #"runDuration": float(finishTime + float(random.randint(1, 11))/10), 
+        "runDuration": float(finishTime + delay/1000),
         "startTime": str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute)
     }
     addResult(result)
@@ -64,46 +48,70 @@ def finishRacer():
     print("-----------------------------------")
     print("")
 
-def parsePacket(packet):
-    header = BitArray(ser.read(1))
-    length = header.read(uint:4)
-    packetType = header.read(uint:4)
-
-    print(header)
-    print(length)
-    print(packetType)
-
-    data = BitArray(ser.read(length))
-    CRC8 = BitArray(ser.read(1))
-
-    #recompute CRC and mark packet as error if both CRCs don't match
-    if length == 0: 
-        packetTop = header.int
-    else
-        packetTop = int(str(header.int) + str(data.int))
-    if calcualteCheckSum(packetTop) != hasher.hexdigest():
-        return {"type": "error"}
+def parsePacket():
+    #read header
+    serRaw = [ord(c) for c in ser.read()]
+    header = BitStream(uint=serRaw[0], length=8)
+    #parse header
+    length = header.read('uint:4')
+    packetType = header.read('uint:4')
+    #read and parse body
+    serRaw = [ord(c) for c in ser.read(length)]
+    body = BitStream(uint=serRaw[0], length=8)
+    data = body.read('uint:8')
+    #read and parse footed
+    serRaw = [ord(c) for c in ser.read(1)]
+    footer = BitStream(uint=serRaw[0], length=8)
+    checkSum = footer.read('uint:8')
     
-    return {
+    #recompute CRC and mark packet as error if both CRCs don't match
+    if (calculateCheckSum(length, 4) + calculateCheckSum(packetType, 4) + calculateCheckSum(data, 8)) != checkSum:
+        print("bad checksum")
+        return {"type": "error"}
+
+    # debug
+    # print("length " + str(length))
+    # print("type " + str(packetType))
+    # print("data " + str(data))
+    # print("checksum  " + str(checkSum))
+
+    return outVal {
         "type": packetType,
-        "data": data.bin
+        "data": data
     }
 
 def addResult(result):
-    fname = "test.json"
+    fname = os.path.expanduser("~/Desktop/finishLine/rest-api/data/results.json")
 
-    with open(fname) as feedsjson:
-        currentResults = json.load(json.load)
+    with open(fname, mode='r') as feedsjson:
+        currentResults = json.load(feedsjson)
 
     currentResults.append(result)
 
     with open(fname, mode='w') as f:
-        f.write(json.dumps(currentResults))
+        f.write(json.dumps(currentResults, indent=4))
 
-def calculateCheckSum(input):
+def calculateCheckSum(input, n):
     tot = 0
-    for i in range(8):
+    for i in range(n):
         tot += (input>>i) & 1
     return tot
+
+while True:
+    if ser.inWaiting()>0:
+        packet = parsePacket() #
+        if packet["type"] == 0: 
+            startRacer(packet["data"])
+        if packet["type"] == 1:
+            ser.write(RTT_RESPONSE_PACKET)
+        if packet["type"] == 3:
+            delay = packet["data"]
+            print("new delay: " + delay)
+
+    if GPIO.input(12) == GPIO.LOW:
+        finishRacer()
+        time.sleep(.5)
+
+    
 
 GPIO.cleanup() # Clean up
