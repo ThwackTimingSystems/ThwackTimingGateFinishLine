@@ -23,7 +23,7 @@ def startRacer(racerId):
     racerTimes.append([racerId, time.time()])
     print("")
     print("-----------------------------------")
-    print('Racer On Course')
+    print('Racer ' + racerId + ' On Course')
     print("-----------------------------------")
     print("")
 
@@ -50,35 +50,38 @@ def finishRacer():
 
 def parsePacket():
     #read header
-    serRaw = [ord(c) for c in ser.read()]
-    header = BitStream(uint=serRaw[0], length=8)
+    serialRaw = [ord(c) for c in ser.read()]
+    header = BitStream(uint=serialRaw[0], length=8)
+
     #parse header
     length = header.read('uint:4')
     packetType = header.read('uint:4')
+
     #read and parse body
-    serRaw = [ord(c) for c in ser.read(length)]
-    body = BitStream(uint=serRaw[0], length=8)
+    serialRaw = [ord(c) for c in ser.read(length)]
+    body = BitStream(uint=serialRaw[0], length=8)
     data = body.read('uint:8')
-    #read and parse footed
-    serRaw = [ord(c) for c in ser.read(1)]
-    footer = BitStream(uint=serRaw[0], length=8)
+
+    #read and parse footer
+    serialRaw = [ord(c) for c in ser.read(1)]
+    footer = BitStream(uint=serialRaw[0], length=8)
     checkSum = footer.read('uint:8')
     
-    #recompute CRC and mark packet as error if both CRCs don't match
+    #recompute checksum and mark packet as error if both checksums don't match
     if (calculateCheckSum(length, 4) + calculateCheckSum(packetType, 4) + calculateCheckSum(data, 8)) != checkSum:
         print("bad checksum")
         return {"type": "error"}
+
+    return outVal {
+        "type": packetType,
+        "data": data
+    }
 
     # debug
     # print("length " + str(length))
     # print("type " + str(packetType))
     # print("data " + str(data))
     # print("checksum  " + str(checkSum))
-
-    return outVal {
-        "type": packetType,
-        "data": data
-    }
 
 def addResult(result):
     fname = os.path.expanduser("~/Desktop/finishLine/rest-api/data/results.json")
