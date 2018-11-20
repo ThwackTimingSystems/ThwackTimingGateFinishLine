@@ -1,19 +1,19 @@
 from bitstring import BitArray, BitStream
-import Leaderboard
+
 import json
 import os
 from datetime import datetime
 
-print(str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute))
+def testFunc(id):
+    fname = os.path.expanduser("~/Desktop/developer/Projects/ThwackRepos/ThwackTimingGateFinishLine/src/test/test2.json")
+    with open(fname, mode='r') as idTable:
+        conversionTable = json.load(idTable)
 
-def calculateCheckSum(input):
-    tot = 0
-    for i in range(8):
-        tot += (input>>i) & 1
-    return tot
+    racerName = conversionTable[0][str(id)]
 
-print(calculateCheckSum(0))
-print(calculateCheckSum(4))
-print(calculateCheckSum(8))
-print(calculateCheckSum(9))
+    return racerName
 
+print("1: " + testFunc("1"))
+print("2: " + testFunc("2"))
+print("3: " + testFunc("3"))
+print("4: " + testFunc("4"))

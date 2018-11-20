@@ -17,7 +17,7 @@ ser = serial.Serial("/dev/ttyUSB0", baudrate=9600)
 
 GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
-GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 10 to be an input        
+GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 10 to be an input    
 
 def startRacer(racerId):
     racerTimes.append([racerId, time.time()])
@@ -32,14 +32,15 @@ def finishRacer():
     racerId = racerTimes[0][0]
     racerTimes.pop(0)
 
+    racerName = idToName(racerId)
     result = {
         "racerID": racerId, 
-        "racerName": "Name Not Assigned", 
+        "racerName": racerName, 
         #"runDuration": float(finishTime + float(random.randint(1, 11))/10), 
         "runDuration": float(finishTime + delay/1000),
         "startTime": str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute)
     }
-    addResult(result)
+    writeResult(result)
 
     print("")
     print("-----------------------------------")
@@ -83,7 +84,13 @@ def parsePacket():
     # print("data " + str(data))
     # print("checksum  " + str(checkSum))
 
-def addResult(result):
+def calculateCheckSum(input, n):
+    tot = 0
+    for i in range(n):
+        tot += (input>>i) & 1
+    return tot
+
+def writeResult(result):
     fname = os.path.expanduser("~/Desktop/finishLine/rest-api/data/results.json")
 
     with open(fname, mode='r') as feedsjson:
@@ -94,15 +101,19 @@ def addResult(result):
     with open(fname, mode='w') as f:
         f.write(json.dumps(currentResults, indent=4))
 
-def calculateCheckSum(input, n):
-    tot = 0
-    for i in range(n):
-        tot += (input>>i) & 1
-    return tot
+def idToName(id):
+    fname = os.path.expanduser("~/Desktop/finishLine/rest-api/data/results.json")
+
+    with open(fname, mode='r') as idTable:
+        conversionTable = json.load(idTable)
+
+    racerName = conversionTable[0][str(id)]
+
+    return racerName
 
 while True:
     if ser.inWaiting()>0:
-        packet = parsePacket() #
+        packet = parsePacket()
         if packet["type"] == 0: 
             startRacer(packet["data"])
         if packet["type"] == 1:
