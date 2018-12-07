@@ -9,7 +9,7 @@ def testFunc(id):
     with open(fname, mode='r') as idTable:
         conversionTable = json.load(idTable)
 
-    racerName = conversionTable[0][str(id)]
+    racerName = conversionTable[str(id)]
 
     return racerName
 

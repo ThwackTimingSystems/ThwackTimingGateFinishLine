@@ -33,12 +33,19 @@ def finishRacer():
     racerTimes.pop(0)
 
     racerName = idToName(racerId)
+
+    minute = datetime.now().time().minute
+    if minute < 10:
+        minute = "0" + str(minute)
+    else:
+        minute = str(minute)
+    
     result = {
         "racerID": racerId, 
         "racerName": racerName, 
         #"runDuration": float(finishTime + float(random.randint(1, 11))/10), 
         "runDuration": float(finishTime + delay/1000),
-        "startTime": str(datetime.now().time().hour) + ":" + str(datetime.now().time().minute)
+        "startTime": str(datetime.now().time().hour) + ":" + minute
     }
     writeResult(result)
 
