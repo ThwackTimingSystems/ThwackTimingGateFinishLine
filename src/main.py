@@ -98,7 +98,7 @@ def calculateCheckSum(input, n):
     return tot
 
 def writeResult(result):
-    fname = os.path.expanduser("~/Desktop/finishLine/rest-api/data/results.json")
+    fname = os.path.expanduser("~/Desktop/finishLine/ThwackTimingGateServer/data/results.json")
 
     with open(fname, mode='r') as feedsjson:
         currentResults = json.load(feedsjson)
@@ -109,7 +109,7 @@ def writeResult(result):
         f.write(json.dumps(currentResults, indent=4))
 
 def idToName(id):
-    fname = os.path.expanduser("~/Desktop/finishLine/rest-api/data/results.json")
+    fname = os.path.expanduser("~/Desktop/finishLine/ThwackTimingGateServer/data/table.json")
 
     with open(fname, mode='r') as idTable:
         conversionTable = json.load(idTable)
