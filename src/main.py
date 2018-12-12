@@ -6,6 +6,7 @@ import RPi.GPIO as GPIO # Import Raspberry Pi GPIO library
 import serial
 import json
 from bitstring import BitArray, BitStream
+from Adafruit_LED_Backpack import SevenSegment
 
 racerTimes = []
 
@@ -19,6 +20,9 @@ GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
 GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 10 to be an input    
 
+display = SevenSegment.SevenSegment()
+display.begin()
+
 def startRacer(racerId):
     racerTimes.append([racerId, time.time()])
     print("")
@@ -29,6 +33,7 @@ def startRacer(racerId):
 
 def finishRacer():
     finishTime = int(((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
+    finishTime = finishTime + delay/1000
     racerId = racerTimes[0][0]
     racerTimes.pop(0)
 
@@ -44,10 +49,15 @@ def finishRacer():
         "racerID": racerId, 
         "racerName": racerName, 
         #"runDuration": float(finishTime + float(random.randint(1, 11))/10), 
-        "runDuration": float(finishTime + delay/1000),
+        "runDuration": float(finishTime),
         "startTime": str(datetime.now().time().hour) + ":" + minute
     }
     writeResult(result)
+
+    #print to 7-seg display
+    display.clear
+    display.print_number_str(finishTime)
+    display.write_display()
 
     print("")
     print("-----------------------------------")
