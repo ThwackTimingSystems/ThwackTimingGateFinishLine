@@ -54,9 +54,13 @@ def finishRacer():
     }
     writeResult(result)
 
+    formattedFinishTime = floatToDigits(finishTime)
     #print to 7-seg display
     display.clear
-    display.print_number_str(finishTime)
+    display.set_digit(0, formattedFinishTime[0])
+    display.set_digit(1, formattedFinishTime[1])
+    display.set_digit(2, formattedFinishTime[2])
+    display.set_digit(3, formattedFinishTime[3])
     display.write_display()
 
     print("")
@@ -127,6 +131,30 @@ def idToName(id):
     racerName = conversionTable[0][str(id)]
 
     return racerName
+
+#takes in float and returns tens place, ones place, hyphen, tenths place in an array
+def floatToDigits(num):
+    numParts = str(num).split(".")
+    outAry = ["F", "F", "F", "F"]
+
+    if (len(numParts[0]) > 1):
+        outAry[0] = numParts[0][-2]
+    else:
+        outAry[0] = "0"
+
+    if (len(numParts[0][-1]) > 0):
+        outAry[1] = numParts[0][-1]
+    else:
+        outAry[0] = "0"
+
+    outAry[2] = "-"
+
+    if(len(numParts) > 1 and len(numParts[1]) > 0):
+        outAry[3] = numParts[1][0]
+    else:
+        outAry[3] = "0"
+
+    return outAry
 
 while True:
     if ser.inWaiting()>0:
