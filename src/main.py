@@ -22,7 +22,7 @@ GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 10 to be an input
 
 display = SevenSegment.SevenSegment()
 display.begin()
-displayActive = false
+displayActive = False
 
 def startRacer(racerId):
     racerTimes.append([racerId, time.time()])
