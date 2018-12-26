@@ -34,6 +34,8 @@ def startRacer(racerId):
 def finishRacer():
     finishTime = int(((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
     finishTime = finishTime + delay/1000
+    if(len(str(finishTime).split(".")) == 1):
+        finishTime = float(finishTime) + float(random.randint(1, 11))/10)
     racerId = racerTimes[0][0]
     racerTimes.pop(0)
 
@@ -47,7 +49,7 @@ def finishRacer():
     
     result = {
         "racerID": racerId, 
-        "racerName": racerName, 
+        #"racerName": racerName, 
         #"runDuration": float(finishTime + float(random.randint(1, 11))/10), 
         "runDuration": float(finishTime),
         "startTime": str(datetime.now().time().hour) + ":" + minute
@@ -69,6 +71,9 @@ def finishRacer():
     print(str(finishTime) + " seconds")
     print("-----------------------------------")
     print("")
+
+    lastFinishStamp = time.time()
+    displayActive = true
 
 def parsePacket():
     #read header
@@ -122,15 +127,15 @@ def writeResult(result):
     with open(fname, mode='w') as f:
         f.write(json.dumps(currentResults, indent=4))
 
-def idToName(id):
-    fname = os.path.expanduser("~/Desktop/finishLine/ThwackTimingGateServer/data/table.json")
+# def idToName(id):
+#     fname = os.path.expanduser("~/Desktop/finishLine/ThwackTimingGateServer/data/table.json")
 
-    with open(fname, mode='r') as idTable:
-        conversionTable = json.load(idTable)
+#     with open(fname, mode='r') as idTable:
+#         conversionTable = json.load(idTable)
 
-    racerName = conversionTable[0][str(id)]
+#     racerName = conversionTable[0][str(id)]
 
-    return racerName
+#     return racerName
 
 #takes in float and returns tens place, ones place, hyphen, tenths place in an array
 def floatToDigits(num):
@@ -170,6 +175,11 @@ while True:
     if GPIO.input(12) == GPIO.LOW:
         finishRacer()
         time.sleep(.5)
+
+    if(displayActive and lastFinishStamp-time.time()>10)
+        display.clear()
+        display.write_display()
+        displayActive = false
 
     
 
