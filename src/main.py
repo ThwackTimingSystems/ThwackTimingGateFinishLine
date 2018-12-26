@@ -35,7 +35,7 @@ def finishRacer():
     finishTime = int(((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
     finishTime = finishTime + delay/1000
     if(len(str(finishTime).split(".")) == 1):
-        finishTime = float(finishTime) + float(random.randint(1, 11))/10)
+        finishTime = float(finishTime) + float(random.randint(1, 11))/10
     racerId = racerTimes[0][0]
     racerTimes.pop(0)
 
