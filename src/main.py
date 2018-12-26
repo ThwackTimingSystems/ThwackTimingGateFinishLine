@@ -99,7 +99,7 @@ def parsePacket():
         print("bad checksum")
         return {"type": "error"}
 
-    return outVal {
+    return {
         "type": packetType,
         "data": data
     }
