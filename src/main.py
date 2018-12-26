@@ -176,7 +176,7 @@ while True:
         finishRacer()
         time.sleep(.5)
 
-    if(displayActive and lastFinishStamp-time.time()>10)
+    if(displayActive and (lastFinishStamp-(time.time()))>10):
         display.clear()
         display.write_display()
         displayActive = false
