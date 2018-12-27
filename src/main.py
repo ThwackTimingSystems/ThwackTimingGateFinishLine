@@ -42,7 +42,7 @@ def finishRacer():
     racerId = racerTimes[0][0]
     racerTimes.pop(0)
 
-    racerName = idToName(racerId)
+    #racerName = idToName(racerId)
 
     minute = datetime.now().time().minute
     if minute < 10:
