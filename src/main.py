@@ -80,7 +80,7 @@ def finishRacer():
 
 def parsePacket():
     #read header
-    serialRaw = [ord(c) for c in ser.read()]
+    serialRaw = [c for c in ser.read()]
     header = BitStream(uint=serialRaw[0], length=8)
 
     #parse header
@@ -88,12 +88,12 @@ def parsePacket():
     packetType = header.read('uint:4')
 
     #read and parse body
-    serialRaw = [ord(c) for c in ser.read(length)]
+    serialRaw = [c for c in ser.read(length)]
     body = BitStream(uint=serialRaw[0], length=8)
     data = body.read('uint:8')
 
     #read and parse footer
-    serialRaw = [ord(c) for c in ser.read(1)]
+    serialRaw = [c for c in ser.read(1)]
     footer = BitStream(uint=serialRaw[0], length=8)
     checkSum = footer.read('uint:8')
     
