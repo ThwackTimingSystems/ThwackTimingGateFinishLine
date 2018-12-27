@@ -28,7 +28,7 @@ def startRacer(racerId):
     racerTimes.append([racerId, time.time()])
     print("")
     print("-----------------------------------")
-    print('Racer ' + racerId + ' On Course')
+    print('Racer ' + str(racerId) + ' On Course')
     print("-----------------------------------")
     print("")
 
