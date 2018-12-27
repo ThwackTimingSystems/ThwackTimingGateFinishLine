@@ -18,7 +18,7 @@ ser = serial.Serial("/dev/ttyUSB0", baudrate=9600)
 
 GPIO.setwarnings(False) # Ignore warning for now
 GPIO.setmode(GPIO.BOARD) # Use physical pin numbering
-GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 10 to be an input    
+GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 12 to be an input    
 
 display = SevenSegment.SevenSegment()
 display.begin()
@@ -33,6 +33,8 @@ def startRacer(racerId):
     print("")
 
 def finishRacer():
+    if(length(finishTime==0)):
+        return
     finishTime = int(((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
     finishTime = finishTime + delay/1000
     if(len(str(finishTime).split(".")) == 1):
