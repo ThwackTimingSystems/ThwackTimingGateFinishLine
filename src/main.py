@@ -33,7 +33,7 @@ def startRacer(racerId):
     print("")
 
 def finishRacer():
-    if(length(finishTime==0)):
+    if(length(racerTimes==0)):
         return
     finishTime = int(((time.time() - racerTimes[0][1]) * 1000) / 1000.0)
     finishTime = finishTime + delay/1000
