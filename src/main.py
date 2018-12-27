@@ -76,7 +76,7 @@ def finishRacer():
     print("")
 
     lastFinishStamp = time.time()
-    displayActive = true
+    displayActive = True
 
 def parsePacket():
     #read header
