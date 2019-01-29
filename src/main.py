@@ -56,6 +56,7 @@ def finishRacer():
     formattedFinishTime = floatToDigits(finishTime)
     printArryToDisplay(formattedFinishTime)
     displayFroze = True
+    print("display frozen")
     lastFinishStamp = time.time()
 
     print("")
@@ -168,6 +169,7 @@ while True:
 
     # stop holding a display after its been 10 seconds since a racer finished
     if(displayFroze and ((time.time())-lastFinishStamp)>10):
+        print("display unfrozen")
         display.clear()
         display.write_display()
         displayFroze = false
