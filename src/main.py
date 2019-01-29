@@ -22,7 +22,7 @@ GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Set pin 12 to be an input
 
 display = SevenSegment.SevenSegment()
 display.begin()
-displayActive = False
+displayFroze = False
 
 def startRacer(racerId):
     racerTimes.append([racerId, time.time()])
@@ -35,14 +35,10 @@ def startRacer(racerId):
 def finishRacer():
     if(len(racerTimes)==0):
         return
-    finishTime = int((time.time() - racerTimes[0][1]) * 10) / 10.0
+    finishTime = int((time.time() - racerTimes[0][1]) * 100) / 100.0
     finishTime = finishTime + delay/1000
-    # if(len(str(finishTime).split(".")) == 1):
-    #     finishTime = float(finishTime) + float(random.randint(1, 11))/10
     racerId = racerTimes[0][0]
     racerTimes.pop(0)
-
-    #racerName = idToName(racerId)
 
     minute = datetime.now().time().minute
     if minute < 10:
@@ -52,21 +48,15 @@ def finishRacer():
     
     result = {
         "racerID": racerId, 
-        #"racerName": racerName, 
-        #"runDuration": float(finishTime + float(random.randint(1, 11))/10), 
         "runDuration": float(finishTime),
         "startTime": str(datetime.now().time().hour) + ":" + minute
     }
     writeResult(result)
 
     formattedFinishTime = floatToDigits(finishTime)
-    #print to 7-seg display
-    display.clear
-    display.set_digit(0, formattedFinishTime[0])
-    display.set_digit(1, formattedFinishTime[1])
-    display.set_digit(2, formattedFinishTime[2])
-    display.set_digit(3, formattedFinishTime[3])
-    display.write_display()
+    printArryToDisplay(formattedFinishTime)
+    displayFroze = True
+    lastFinishStamp = time.time()
 
     print("")
     print("-----------------------------------")
@@ -74,9 +64,6 @@ def finishRacer():
     print(str(finishTime) + " seconds")
     print("-----------------------------------")
     print("")
-
-    lastFinishStamp = time.time()
-    displayActive = True
 
 def parsePacket():
     #read header
@@ -130,16 +117,6 @@ def writeResult(result):
     with open(fname, mode='w') as f:
         f.write(json.dumps(currentResults, indent=4))
 
-# def idToName(id):
-#     fname = os.path.expanduser("~/Desktop/finishLine/ThwackTimingGateServer/data/table.json")
-
-#     with open(fname, mode='r') as idTable:
-#         conversionTable = json.load(idTable)
-
-#     racerName = conversionTable[0][str(id)]
-
-#     return racerName
-
 #takes in float and returns tens place, ones place, hyphen, tenths place in an array
 def floatToDigits(num):
     numParts = str(num).split(".")
@@ -164,6 +141,16 @@ def floatToDigits(num):
 
     return outAry
 
+#takes and array of strings to print to the display
+def printArryToDisplay(arry):
+    #print to 7-seg display
+    display.clear
+    display.set_digit(0, arry[0])
+    display.set_digit(1, arry[1])
+    display.set_digit(2, arry[2])
+    display.set_digit(3, arry[3])
+    display.write_display()
+
 while True:
     if ser.inWaiting()>0:
         packet = parsePacket()
@@ -179,10 +166,15 @@ while True:
         finishRacer()
         time.sleep(.5)
 
-    if(displayActive and (lastFinishStamp-(time.time()))>10):
+    # stop holding a display after its been 10 seconds since a racer finished
+    if(displayFroze and ((time.time())-lastFinishStamp)>10):
         display.clear()
         display.write_display()
-        displayActive = false
+        displayFroze = false
+    
+    #show the on course racer's finish time if a racer hasn't finished recently
+    if(len(racerTimes)>0 and not displayFroze):
+        printArryToDisplay(floatToDigits(time.time() - racerTimes[0][1]))
 
     
 
