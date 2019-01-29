@@ -168,7 +168,7 @@ while True:
         time.sleep(.5)
 
     # stop holding a display after its been 10 seconds since a racer finished
-    if(displayFroze and ((time.time())-lastFinishStamp)>500):
+    if(displayFroze and ((time.time())-lastFinishStamp)>5000):
         print("display unfrozen")
         display.clear()
         display.write_display()
